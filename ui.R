@@ -10,6 +10,11 @@ library(rCharts)
 library(rjson)
 library(zipcode)
 
+library(treemap)
+library(d3treeR)
+
+pdf(NULL)
+
 art <- read.csv("artproject.csv")
 
 art$project.START.date <- mdy(art$project.START.date)
@@ -41,11 +46,13 @@ shinyUI(navbarPage("LA Public Art Dashboard", tabPanel("Home"),
                                                  min = mdy("09-16-1991"), max = Sys.Date(),
                                                  separator = " - ", format = "mm/dd/yy",
                                                  startview = 'year', language = 'en', weekstart = 1),
-                                  submitButton("Apply Filter")
+                                  submitButton("Apply Filters")
                      ),
                      
                      mainPanel(
                        tabsetPanel(type = "tabs", 
+                                   tabPanel("Project Explorer",
+                                            fluidRow(d3tree2Output("tree1", width="100%", height="530px"))),
                                    tabPanel("Cost vs Duration", 
                                             fluidRow(plotlyOutput("scatPlot",height="530px"))),
                                    tabPanel("Expenditures by Year", 

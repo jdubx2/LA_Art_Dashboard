@@ -9,6 +9,11 @@ library(rCharts)
 library(rjson)
 library(zipcode)
 
+library(treemap)
+library(d3treeR)
+
+pdf(NULL)
+
 art <- read.csv("artproject.csv")
 
 art$project.START.date <- mdy(art$project.START.date)
@@ -192,5 +197,30 @@ shinyServer(function(input, output) {
     
   })
   
+  output$tree1 <- renderD3tree2({
+    
+    agencyFilter <- if(length(input$agency) == 0){unique(art$Agency)}
+    else{input$agency}
+    
+    councFilter <- if(length(input$councdist) == 0){unique(art$project.CD)}
+    else(input$councdist)
+    
+    dateFilter <- input$dateRange2
+    
+    art_tm <- art %>%
+      filter(!(is.na(project.START.date))) %>%
+      filter(Agency %in% agencyFilter & project.CD %in% councFilter) %>%
+      filter(project.START.date >= dateFilter[1] & project.START.date <= dateFilter[2]) %>%
+      select(AGENCY,PROJECT.NAME, FULL.1..amount)
+    
+    art_tm1 <- treemap(art_tm,
+                       index = c("AGENCY","PROJECT.NAME"),
+                       vSize = "FULL.1..amount",
+                       type="index",
+                       palette = "Paired")
+    
+    d3tree2(art_tm1, rootname="Art Project Explorer")
+    
+  })
   
 })
